@@ -5,3 +5,18 @@ setup.py
 src/setup.py
 __pycache__/
 env/
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec.bak
+*.pyc
+__pycache__/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+*.swp
+*.swo

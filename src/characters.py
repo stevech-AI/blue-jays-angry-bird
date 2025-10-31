@@ -3,8 +3,9 @@ from pymunk import Vec2d
 
 
 class Bird():
-    def __init__(self, distance, angle, x, y, space):
+    def __init__(self, distance, angle, x, y, space, player_name=""):
         self.life = 20
+        self.player_name = player_name
         mass = 5
         radius = 12
         inertia = pm.moment_for_circle(mass, 0, radius, (0, 0))
@@ -24,8 +25,9 @@ class Bird():
 
 
 class Pig():
-    def __init__(self, x, y, space):
+    def __init__(self, x, y, space, player_name=""):
         self.life = 20
+        self.player_name = player_name
         mass = 5
         radius = 14
         inertia = pm.moment_for_circle(mass, 0, radius, (0, 0))

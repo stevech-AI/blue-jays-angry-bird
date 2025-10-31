@@ -1,6 +1,24 @@
 from characters import Pig
 from polygon import Polygon
 
+# Dodgers players list - 2024-2025 active roster
+DODGERS_PLAYERS = [
+    "Mookie Betts",
+    "Freddie Freeman",
+    "Shohei Ohtani",
+    "Will Smith",
+    "Max Muncy",
+    "Teoscar Hernández",
+    "Gavin Lux",
+    "James Outman",
+    "Tyler Glasnow",
+    "Yoshinobu Yamamoto",
+    "Bobby Miller",
+    "Walker Buehler",
+    "Chris Taylor",
+    "Enrique Hernández",
+    "Miguel Rojas"
+]
 
 class Level():
     def __init__(self, pigs, columns, beams, space):
@@ -15,6 +33,7 @@ class Level():
         self.two_star = 40000
         self.three_star = 60000
         self.bool_space = False
+        self.player_index = 0
 
     def open_flat(self, x, y, n):
         """Create a open flat struture"""
@@ -58,8 +77,10 @@ class Level():
 
     def build_0(self):
         """level 0"""
-        pig1 = Pig(980, 100, self.space)
-        pig2 = Pig(985, 182, self.space)
+        pig1 = Pig(980, 100, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
+        pig2 = Pig(985, 182, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig1)
         self.pigs.append(pig2)
         p = (950, 80)
@@ -83,7 +104,8 @@ class Level():
 
     def build_1(self):
         """level 1"""
-        pig = Pig(1000, 100, self.space)
+        pig = Pig(1000, 100, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
         p = (900, 80)
         self.columns.append(Polygon(p, 20, 85, self.space))
@@ -101,9 +123,11 @@ class Level():
 
     def build_2(self):
         """level 2"""
-        pig1 = Pig(880, 180, self.space)
+        pig1 = Pig(880, 180, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig1)
-        pig2 = Pig(1000, 230, self.space)
+        pig2 = Pig(1000, 230, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig2)
         p = (880, 80)
         self.columns.append(Polygon(p, 20, 85, self.space))
@@ -121,13 +145,16 @@ class Level():
 
     def build_3(self):
         """level 3"""
-        pig = Pig(950, 320, self.space)
+        pig = Pig(950, 320, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 25
         self.pigs.append(pig)
-        pig = Pig(885, 225, self.space)
+        pig = Pig(885, 225, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 25
         self.pigs.append(pig)
-        pig = Pig(1005, 225, self.space)
+        pig = Pig(1005, 225, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 25
         self.pigs.append(pig)
         p = (1100, 100)
@@ -178,11 +205,14 @@ class Level():
 
     def build_4(self):
         """level 4"""
-        pig = Pig(900, 300, self.space)
+        pig = Pig(900, 300, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(1000, 500, self.space)
+        pig = Pig(1000, 500, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(1100, 400, self.space)
+        pig = Pig(1100, 400, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
         self.number_of_birds = 4
         if self.bool_space:
@@ -190,9 +220,11 @@ class Level():
 
     def build_5(self):
         """level 5"""
-        pig = Pig(900, 70, self.space)
+        pig = Pig(900, 70, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(1000, 152, self.space)
+        pig = Pig(1000, 152, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
         for i in range(9):
             p = (800, 70+i*21)
@@ -212,12 +244,15 @@ class Level():
 
     def build_6(self):
         """level 6"""
-        pig = Pig(920, 533, self.space)
+        pig = Pig(920, 533, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 40
         self.pigs.append(pig)
-        pig = Pig(820, 533, self.space)
+        pig = Pig(820, 533, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(720, 633, self.space)
+        pig = Pig(720, 633, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
         self.closed_flat(895, 423, 1)
         self.vertical_pile(900, 0, 5)
@@ -229,13 +264,16 @@ class Level():
 
     def build_7(self):
         """level 7"""
-        pig = Pig(978, 180, self.space)
+        pig = Pig(978, 180, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 30
         self.pigs.append(pig)
-        pig = Pig(978, 280, self.space)
+        pig = Pig(978, 280, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 30
         self.pigs.append(pig)
-        pig = Pig(978, 80, self.space)
+        pig = Pig(978, 80, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 30
         self.pigs.append(pig)
         self.open_flat(950, 0, 3)
@@ -247,13 +285,16 @@ class Level():
 
     def build_8(self):
         """level 8"""
-        pig = Pig(1000, 180, self.space)
+        pig = Pig(1000, 180, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 30
         self.pigs.append(pig)
-        pig = Pig(1078, 280, self.space)
+        pig = Pig(1078, 280, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 30
         self.pigs.append(pig)
-        pig = Pig(900, 80, self.space)
+        pig = Pig(900, 80, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 30
         self.pigs.append(pig)
         self.open_flat(1050, 0, 3)
@@ -265,10 +306,12 @@ class Level():
 
     def build_9(self):
         """level 9"""
-        pig = Pig(1000, 180, self.space)
+        pig = Pig(1000, 180, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 20
         self.pigs.append(pig)
-        pig = Pig(900, 180, self.space)
+        pig = Pig(900, 180, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 20
         self.pigs.append(pig)
         self.open_flat(1050, 0, 3)
@@ -281,12 +324,15 @@ class Level():
 
     def build_10(self):
         """level 10"""
-        pig = Pig(960, 250, self.space)
+        pig = Pig(960, 250, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 20
         self.pigs.append(pig)
-        pig = Pig(820, 160, self.space)
+        pig = Pig(820, 160, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(1100, 160, self.space)
+        pig = Pig(1100, 160, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
         self.vertical_pile(900, 0, 3)
         self.vertical_pile(930, 0, 3)
@@ -301,13 +347,17 @@ class Level():
 
     def build_11(self):
         """level 11"""
-        pig = Pig(820, 177, self.space)
+        pig = Pig(820, 177, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(960, 150, self.space)
+        pig = Pig(960, 150, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(1100, 130, self.space)
+        pig = Pig(1100, 130, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         self.pigs.append(pig)
-        pig = Pig(890, 270, self.space)
+        pig = Pig(890, 270, self.space, DODGERS_PLAYERS[self.player_index % len(DODGERS_PLAYERS)])
+        self.player_index += 1
         pig.life = 30
         self.pigs.append(pig)
         self.horizontal_pile(800, 0, 5)
@@ -324,6 +374,7 @@ class Level():
             self.number_of_birds = 8
 
     def load_level(self):
+        self.player_index = 0  # Reset player index for each level
         try:
             build_name = "build_"+str(self.number)
             getattr(self, build_name)()

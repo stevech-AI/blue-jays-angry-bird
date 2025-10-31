@@ -3,31 +3,117 @@ import sys
 import math
 import time
 import pygame
+# Get the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
+resources_path = os.path.join(project_root, "resources", "images")
 current_path = os.getcwd()
 import pymunk as pm
 from characters import Bird
 from level import Level
 
+# Blue Jays players list - 2024-2025 active roster
+BLUE_JAYS_PLAYERS = [
+    "Vladimir Guerrero Jr.",
+    "Bo Bichette",
+    "George Springer",
+    "Kevin Gausman",
+    "Alejandro Kirk",
+    "Danny Jansen",
+    "Daulton Varsho",
+    "Davis Schneider",
+    "Ernie Clement",
+    "Spencer Horwitz",
+    "Isiah Kiner-Falefa",
+    "Justin Turner",
+    "Yusei Kikuchi",
+    "José Berríos",
+    "Chris Bassitt"
+]
+
+# Track bird player index
+bird_player_index = 0
+# Track used player names for current level to ensure uniqueness
+used_player_names = []
 
 pygame.init()
 screen = pygame.display.set_mode((1200, 650))
-redbird = pygame.image.load(
-    "../resources/images/red-bird3.png").convert_alpha()
+
+def colorize_red_to_blue(image):
+    """Convert red bird to blue by swapping red and blue color channels"""
+    image = image.copy()
+    width, height = image.get_size()
+    # Create a new surface for the result
+    result = pygame.Surface((width, height), pygame.SRCALPHA)
+    
+    for x in range(width):
+        for y in range(height):
+            r, g, b, a = image.get_at((x, y))
+            # Swap red and blue channels to convert red to blue
+            # This preserves green and alpha
+            result.set_at((x, y), (b, g, r, a))
+    
+    return result
+
+# Load original red bird and change color to blue
+redbird = pygame.image.load(os.path.join(resources_path, "red-bird.png")).convert_alpha()
+redbird = colorize_red_to_blue(redbird)
 background2 = pygame.image.load(
-    "../resources/images/background3.png").convert_alpha()
+    os.path.join(resources_path, "background3.png")).convert_alpha()
 sling_image = pygame.image.load(
-    "../resources/images/sling-3.png").convert_alpha()
-full_sprite = pygame.image.load(
-    "../resources/images/full-sprite.png").convert_alpha()
-rect = pygame.Rect(181, 1050, 50, 50)
-cropped = full_sprite.subsurface(rect).copy()
-pig_image = pygame.transform.scale(cropped, (30, 30))
+    os.path.join(resources_path, "sling-3.png")).convert_alpha()
+# Load Dodgers logo for pigs
+dodgers_logo_path = os.path.join(resources_path, "dodgers_logo.png")
+if os.path.exists(dodgers_logo_path):
+    try:
+        dodgers_logo_original = pygame.image.load(dodgers_logo_path).convert_alpha()
+        # Scale to match pig size (30x30)
+        original_width, original_height = dodgers_logo_original.get_size()
+        scale_factor = min(30 / original_width, 30 / original_height)
+        new_width = int(original_width * scale_factor)
+        new_height = int(original_height * scale_factor)
+        dodgers_pig_image = pygame.transform.scale(dodgers_logo_original, (new_width, new_height))
+        print(f"✓ Loaded Dodgers logo for pigs ({new_width}x{new_height})")
+    except Exception as e:
+        print(f"✗ Error loading Dodgers logo: {e}")
+        # Fallback to default pig image
+        full_sprite = pygame.image.load(os.path.join(resources_path, "full-sprite.png")).convert_alpha()
+        rect = pygame.Rect(181, 1050, 50, 50)
+        cropped = full_sprite.subsurface(rect).copy()
+        dodgers_pig_image = pygame.transform.scale(cropped, (30, 30))
+        print("   Using default pig image as fallback")
+else:
+    # Fallback to default pig image
+    full_sprite = pygame.image.load("../resources/images/full-sprite.png").convert_alpha()
+    rect = pygame.Rect(181, 1050, 50, 50)
+    cropped = full_sprite.subsurface(rect).copy()
+    dodgers_pig_image = pygame.transform.scale(cropped, (30, 30))
+    print(f"⚠️  Dodgers logo not found at {dodgers_logo_path}")
+    print("   Using default pig image as fallback")
 buttons = pygame.image.load(
-    "../resources/images/selected-buttons.png").convert_alpha()
-pig_happy = pygame.image.load(
-    "../resources/images/pig_failed.png").convert_alpha()
+    os.path.join(resources_path, "selected-buttons.png")).convert_alpha()
+# Load Ohtani image for failed screen
+ohtani_image_path = os.path.join(resources_path, "ohtani.png")
+if os.path.exists(ohtani_image_path):
+    try:
+        pig_happy = pygame.image.load(ohtani_image_path).convert_alpha()
+        # Scale to appropriate size for failed screen
+        ohtani_width, ohtani_height = pig_happy.get_size()
+        scale_factor = min(300 / ohtani_width, 300 / ohtani_height)
+        new_width = int(ohtani_width * scale_factor)
+        new_height = int(ohtani_height * scale_factor)
+        pig_happy = pygame.transform.smoothscale(pig_happy, (new_width, new_height))
+        print(f"✓ Loaded Ohtani image for failed screen ({new_width}x{new_height})")
+    except Exception as e:
+        print(f"✗ Error loading Ohtani image: {e}")
+        pig_happy = pygame.image.load(os.path.join(resources_path, "pig_failed.png")).convert_alpha()
+        print("   Using default pig_failed image as fallback")
+else:
+    pig_happy = pygame.image.load(os.path.join(resources_path, "pig_failed.png")).convert_alpha()
+    print(f"⚠️  Ohtani image not found at {ohtani_image_path}")
+    print("   Using default pig_failed image - please add ohtani.png")
 stars = pygame.image.load(
-    "../resources/images/stars-edited.png").convert_alpha()
+    os.path.join(resources_path, "stars-edited.png")).convert_alpha()
 rect = pygame.Rect(0, 0, 200, 200)
 star1 = stars.subsurface(rect).copy()
 rect = pygame.Rect(204, 0, 200, 200)
@@ -81,6 +167,7 @@ bonus_score_once = True
 bold_font = pygame.font.SysFont("arial", 30, bold=True)
 bold_font2 = pygame.font.SysFont("arial", 40, bold=True)
 bold_font3 = pygame.font.SysFont("arial", 50, bold=True)
+name_font = pygame.font.SysFont("arial", 14, bold=True)
 wall = False
 
 # Static floor
@@ -134,7 +221,8 @@ def distance(xo, yo, x, y):
 
 def load_music():
     """Load the music"""
-    song1 = '../resources/sounds/angry-birds.ogg'
+    sounds_path = os.path.join(project_root, "resources", "sounds")
+    song1 = os.path.join(sounds_path, "angry-birds.ogg")
     pygame.mixer.music.load(song1)
     pygame.mixer.music.play(-1)
 
@@ -146,6 +234,7 @@ def sling_action():
     global angle
     global x_mouse
     global y_mouse
+    global used_player_names
     # Fixing bird to the sling rope
     v = vector((sling_x, sling_y), (x_mouse, y_mouse))
     uv = unit_vector(v)
@@ -158,20 +247,52 @@ def sling_action():
     y_redbird = y_mouse - 20
     if mouse_distance > rope_lenght:
         pux, puy = pu
-        pux -= 20
-        puy -= 20
+        # Center the logo properly
+        pux -= redbird.get_width() // 2
+        puy -= redbird.get_height() // 2
         pul = pux, puy
         screen.blit(redbird, pul)
         pu2 = (uv1*bigger_rope+sling_x, uv2*bigger_rope+sling_y)
         pygame.draw.line(screen, (0, 0, 0), (sling2_x, sling2_y), pu2, 5)
         screen.blit(redbird, pul)
         pygame.draw.line(screen, (0, 0, 0), (sling_x, sling_y), pu2, 5)
+        # Display player name when dragging (rope extended)
+        available_players = [p for p in BLUE_JAYS_PLAYERS if p not in used_player_names]
+        if available_players:
+            player_name = available_players[0]  # Next bird to be launched
+        else:
+            player_name = BLUE_JAYS_PLAYERS[bird_player_index % len(BLUE_JAYS_PLAYERS)]
+        if player_name:
+            display_name = player_name
+            name_text = name_font.render(display_name, True, WHITE)
+            name_rect = name_text.get_rect(center=(pux + 22, puy - 18))
+            bg_rect = pygame.Rect(name_rect.x - 3, name_rect.y - 2, 
+                                 name_rect.width + 6, name_rect.height + 4)
+            pygame.draw.rect(screen, BLACK, bg_rect)
+            screen.blit(name_text, name_rect)
     else:
         mouse_distance += 10
         pu3 = (uv1*mouse_distance+sling_x, uv2*mouse_distance+sling_y)
         pygame.draw.line(screen, (0, 0, 0), (sling2_x, sling2_y), pu3, 5)
-        screen.blit(redbird, (x_redbird, y_redbird))
+        # Center the logo properly when dragging
+        x_redbird_centered = x_mouse - redbird.get_width() // 2
+        y_redbird_centered = y_mouse - redbird.get_height() // 2
+        screen.blit(redbird, (x_redbird_centered, y_redbird_centered))
         pygame.draw.line(screen, (0, 0, 0), (sling_x, sling_y), pu3, 5)
+        # Display player name when dragging (rope not extended)
+        available_players = [p for p in BLUE_JAYS_PLAYERS if p not in used_player_names]
+        if available_players:
+            player_name = available_players[0]  # Next bird to be launched
+        else:
+            player_name = BLUE_JAYS_PLAYERS[bird_player_index % len(BLUE_JAYS_PLAYERS)]
+        if player_name:
+            display_name = player_name
+            name_text = name_font.render(display_name, True, WHITE)
+            name_rect = name_text.get_rect(center=(x_mouse, y_redbird - 18))
+            bg_rect = pygame.Rect(name_rect.x - 3, name_rect.y - 2, 
+                                 name_rect.width + 6, name_rect.height + 4)
+            pygame.draw.rect(screen, BLACK, bg_rect)
+            screen.blit(name_text, name_rect)
     # Angle of impulse
     dy = y_mouse - sling_y
     dx = x_mouse - sling_x
@@ -218,12 +339,17 @@ def draw_level_failed():
         rect = pygame.Rect(300, 0, 600, 800)
         pygame.draw.rect(screen, BLACK, rect)
         screen.blit(failed, (450, 90))
-        screen.blit(pig_happy, (380, 120))
+        # Center the Ohtani image on the failed screen
+        ohtani_x = (1200 - pig_happy.get_width()) // 2
+        ohtani_y = 120
+        screen.blit(pig_happy, (ohtani_x, ohtani_y))
         screen.blit(replay_button, (520, 460))
 
 
 def restart():
     """Delete all objects of the level"""
+    global bird_player_index
+    global used_player_names
     pigs_to_remove = []
     birds_to_remove = []
     columns_to_remove = []
@@ -233,6 +359,8 @@ def restart():
     for pig in pigs_to_remove:
         space.remove(pig.shape, pig.shape.body)
         pigs.remove(pig)
+    bird_player_index = 0  # Reset bird player index on restart
+    used_player_names = []  # Reset used player names on restart
     for bird in birds:
         birds_to_remove.append(bird)
     for bird in birds_to_remove:
@@ -360,11 +488,28 @@ while running:
                 yo = 156
                 if mouse_distance > rope_lenght:
                     mouse_distance = rope_lenght
+                # Assign unique player names - find next unused player
+                global used_player_names
+                available_players = [p for p in BLUE_JAYS_PLAYERS if p not in used_player_names]
+                
+                if available_players:
+                    # Use first available unique player
+                    player_name = available_players[0]
+                else:
+                    # All players used, reset and start over (shouldn't happen in normal gameplay)
+                    used_player_names = []
+                    player_name = BLUE_JAYS_PLAYERS[0]
+                
+                used_player_names.append(player_name)
+                bird_player_index += 1
+                # Reset index if we've used all players
+                if bird_player_index >= len(BLUE_JAYS_PLAYERS):
+                    bird_player_index = 0
                 if x_mouse < sling_x+5:
-                    bird = Bird(mouse_distance, angle, xo, yo, space)
+                    bird = Bird(mouse_distance, angle, xo, yo, space, player_name)
                     birds.append(bird)
                 else:
-                    bird = Bird(-mouse_distance, angle, xo, yo, space)
+                    bird = Bird(-mouse_distance, angle, xo, yo, space, player_name)
                     birds.append(bird)
                 if level.number_of_birds == 0:
                     t2 = time.time()
@@ -420,13 +565,51 @@ while running:
     if level.number_of_birds > 0:
         for i in range(level.number_of_birds-1):
             x = 100 - (i*35)
-            screen.blit(redbird, (x, 508))
+            # Center the logo properly in the wait line
+            bird_x = x
+            bird_y = 508
+            screen.blit(redbird, (bird_x, bird_y))
+            # Display player name above waiting bird - show next unique names in sequence
+            available_players = [p for p in BLUE_JAYS_PLAYERS if p not in used_player_names]
+            if available_players:
+                # Show next available unique player (i+1 because current bird is at index 0)
+                queue_position = (i + 1) % len(available_players) if available_players else 0
+                player_name = available_players[queue_position] if available_players else BLUE_JAYS_PLAYERS[0]
+            else:
+                # All used, cycle through original list (shouldn't happen in normal gameplay)
+                player_name = BLUE_JAYS_PLAYERS[(bird_player_index + i) % len(BLUE_JAYS_PLAYERS)]
+            if player_name:
+                display_name = player_name
+                name_text = name_font.render(display_name, True, WHITE)
+                name_rect = name_text.get_rect(center=(x + 22, 508 - 18))
+                bg_rect = pygame.Rect(name_rect.x - 3, name_rect.y - 2, 
+                                     name_rect.width + 6, name_rect.height + 4)
+                pygame.draw.rect(screen, BLACK, bg_rect)
+                screen.blit(name_text, name_rect)
     # Draw sling behavior
     if mouse_pressed and level.number_of_birds > 0:
         sling_action()
     else:
         if time.time()*1000 - t1 > 300 and level.number_of_birds > 0:
-            screen.blit(redbird, (130, 426))
+            # Center the logo in the sling
+            sling_x_pos = 130
+            sling_y_pos = 426
+            screen.blit(redbird, (sling_x_pos, sling_y_pos))
+            # Display player name above bird in sling - show next unique name
+            available_players = [p for p in BLUE_JAYS_PLAYERS if p not in used_player_names]
+            if available_players:
+                player_name = available_players[0]  # Next bird to be launched gets first available
+            else:
+                # All used, cycle through original list (shouldn't happen in normal gameplay)
+                player_name = BLUE_JAYS_PLAYERS[bird_player_index % len(BLUE_JAYS_PLAYERS)]
+            if player_name:
+                display_name = player_name
+                name_text = name_font.render(display_name, True, WHITE)
+                name_rect = name_text.get_rect(center=(152, 404))
+                bg_rect = pygame.Rect(name_rect.x - 3, name_rect.y - 2, 
+                                     name_rect.width + 6, name_rect.height + 4)
+                pygame.draw.rect(screen, BLACK, bg_rect)
+                screen.blit(name_text, name_rect)
         else:
             pygame.draw.line(screen, (0, 0, 0), (sling_x, sling_y-8),
                              (sling2_x, sling2_y-7), 5)
@@ -439,11 +622,23 @@ while running:
             birds_to_remove.append(bird)
         p = to_pygame(bird.shape.body.position)
         x, y = p
-        x -= 22
-        y -= 20
+        # Center the logo properly based on its actual size
+        x -= redbird.get_width() // 2
+        y -= redbird.get_height() // 2
         screen.blit(redbird, (x, y))
         pygame.draw.circle(screen, BLUE,
                            p, int(bird.shape.radius), 2)
+        # Display player name above bird (flying)
+        if bird.player_name:
+            # Use full name for display
+            display_name = bird.player_name
+            name_text = name_font.render(display_name, True, WHITE)
+            name_rect = name_text.get_rect(center=(p[0], p[1] - 35))
+            # Draw semi-transparent background for better readability
+            bg_rect = pygame.Rect(name_rect.x - 3, name_rect.y - 2, 
+                                 name_rect.width + 6, name_rect.height + 4)
+            pygame.draw.rect(screen, BLACK, bg_rect)
+            screen.blit(name_text, name_rect)
         if counter >= 3 and time.time() - t1 < 5:
             bird_path.append(p)
             restart_counter = True
@@ -467,23 +662,34 @@ while running:
         pygame.draw.lines(screen, (150, 150, 150), False, [p1, p2])
     i = 0
     # Draw pigs
-    for pig in pigs:
+    for pig_obj in pigs:
         i += 1
-        # print (i,pig.life)
-        pig = pig.shape
-        if pig.body.position.y < 0:
-            pigs_to_remove.append(pig)
+        # print (i,pig_obj.life)
+        pig_shape = pig_obj.shape
+        if pig_shape.body.position.y < 0:
+            pigs_to_remove.append(pig_obj)
 
-        p = to_pygame(pig.body.position)
+        p = to_pygame(pig_shape.body.position)
         x, y = p
 
-        angle_degrees = math.degrees(pig.body.angle)
-        img = pygame.transform.rotate(pig_image, angle_degrees)
+        # Use Dodgers logo for all pigs
+        img_to_use = dodgers_pig_image
+        
+        angle_degrees = math.degrees(pig_shape.body.angle)
+        img = pygame.transform.rotate(img_to_use, angle_degrees)
         w,h = img.get_size()
         x -= w*0.5
         y -= h*0.5
         screen.blit(img, (x, y))
-        pygame.draw.circle(screen, BLUE, p, int(pig.radius), 2)
+        pygame.draw.circle(screen, BLUE, p, int(pig_shape.radius), 2)
+        # Display player name above pig
+        if pig_obj.player_name:
+            name_text = name_font.render(pig_obj.player_name, True, WHITE)
+            name_rect = name_text.get_rect(center=(p[0], p[1] - 30))
+            # Draw background for text
+            pygame.draw.rect(screen, BLACK, (name_rect.x - 2, name_rect.y - 2, 
+                                           name_rect.width + 4, name_rect.height + 4))
+            screen.blit(name_text, name_rect)
     # Draw columns and Beams
     for column in columns:
         column.draw_poly('columns', screen)

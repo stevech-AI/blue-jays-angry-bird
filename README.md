@@ -6,15 +6,39 @@ Angry Birds in Python
 
 Requirements
 ------------
+- Python 3.9 or higher
+- Install dependencies:
 ```bash
 pip install -r requirements.txt
+```
+or
+```bash
+pip3 install -r requirements.txt
 ```
 
 To play
 -------
-1. Clone the project.
-2. Open the src folder.
-3. `python main.py`
+1. Clone the project:
+   ```bash
+   git clone <repository-url>
+   cd angry-birds-python
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Run the game (from project root):
+   ```bash
+   python3 src/main.py
+   ```
+   or on Windows:
+   ```bash
+   python src/main.py
+   ```
+
+**Note:** Make sure to run from the project root directory, not from inside the `src` folder.
 
 Zero Gravity
 ------------
